@@ -40,6 +40,8 @@ class Week extends Command
 
     protected $exceptionIssue;
 
+    protected $week = '';
+
     public function __construct()
     {
         parent::__construct();
@@ -89,11 +91,19 @@ class Week extends Command
                     }
                 }
             }
+            $markdown = $this->buildMessage(
+                "周报",
+                $this->week,
+                "",
+                ""
+            );
+            $this->send($markdown);
         } catch (Exception $e) {
             if ($this->exceptionIssue && $this->exceptionIssue['assignee']) {
                 $mobile = $this->mobiles[$this->exceptionIssue['assignee']['username']]??"";
                 $markdown = $this->buildMessage(
                     $this->exceptionIssue['title'],
+                    "",
                     $this->exceptionIssue['web_url'],
                     $mobile
                 );
@@ -189,12 +199,12 @@ class Week extends Command
         return Gitlab::api('milestones')->issues($projectId, $milestoneId);
     }
 
-    protected function buildMessage($title, $messageUrl, $mobile)
+    protected function buildMessage($title, $text, $messageUrl, $mobile)
     {
 
         $lnk = new Markdown;
         $lnk->title = $title;
-        $lnk->text = "@".$mobile;
+        $lnk->text =  $text . "@".$mobile;
         $lnk->messageUrl = $messageUrl;
         $lnk->atMobiles = $mobile;
 
@@ -206,6 +216,12 @@ class Week extends Command
         $this->info($message);
         $request = new Request('POST', env('DINGDING_URL'), ['Content-Type' => 'application/json'], $message);
         $this->guzzleClient->send($request);
+    }
+
+    public function info($string, $v = null)
+    {
+        $this->week .= $string .PHP_EOL;
+        $this->line($string, 'info', $v);
     }
 
 }
