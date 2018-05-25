@@ -86,8 +86,9 @@ class FailedIssueInMilestones extends Command
                     $todoMessage = !$todoStatus? implode(' Or ', $todoLabels):'';
                     $taskMessage = !$taskStatus? implode(' Or ', $taskLabels):'';
 
-                    $message = sprintf("link:%s,add %s", $issue['web_url'], implode('', [$todoMessage, $taskMessage]));
-                    $this->info($message);
+                    $message = sprintf("link:%s , add %s", $issue['web_url'], implode('', [$todoMessage, $taskMessage]));
+                    $username = ($issue['assignee']['username']??'')?:$issue['author']['username'];
+                    $this->info($message. ' @'.$username);
                 }
 
             }
